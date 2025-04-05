@@ -3,9 +3,13 @@ library(readxl)   # For reading Excel files
 library(ggplot2)  # For creating plots
 library(dplyr)    # For data manipulation
 
+
+
 # Read the Excel file
 # Replace "your_file.xlsx" with your actual file path and sheet name if needed
-data <- read_excel("C:\\Users\\hina v2\\Downloads\\General Classial Dataset.xlsx") %>%
+filepth <- paste(toString(getwd()), "/data/Classical-General-Normalized.xlsx", sep="")
+print(filepth)
+data <- read_excel(filepth) %>%
   mutate(
     # Calculate reaction time as average of buzzer and actual time
     reaction_time = (`buzz time` + `speaking time`) / 2,
@@ -26,15 +30,15 @@ basic_density <- ggplot(data, aes(x = reaction_time)) +
 enhanced_density <- ggplot(data, aes(x = reaction_time)) +
   # Main density plot
   geom_density(fill = "#4e79a7", alpha = 0.5, color = NA) +
-  
+
   # Add uncertainty representation (using geom_ribbon)
   geom_ribbon(
     stat = "density",
-    aes(ymin = after_stat(density) - uncertainty/max(uncertainty)*0.1,
-        ymax = after_stat(density) + uncertainty/max(uncertainty)*0.1),
+    aes(ymin = after_stat(density) - uncertainty / max(uncertainty) * 0.1,
+        ymax = after_stat(density) + uncertainty / max(uncertainty) * 0.1),
     fill = "#f28e2b", alpha = 0.3
   ) +
-  
+
   labs(title = "Reaction Time Density with Uncertainty Bands",
        x = "Reaction Time",
        y = "Density",
@@ -44,9 +48,9 @@ enhanced_density <- ggplot(data, aes(x = reaction_time)) +
         plot.caption = element_text(hjust = 0.5, face = "italic"))
 
 # Display both plots
-basic_density
-enhanced_density
+plot(basic_density)
+plot(enhanced_density)
 
 # Save plots if needed
-# ggsave("basic_density_plot.png", basic_density, width = 8, height = 6, dpi = 300)
-# ggsave("enhanced_density_plot.png", enhanced_density, width = 8, height = 6, dpi = 300)
+ggsave("basic_density_plot.png", basic_density, width = 8, height = 6, dpi = 300)
+ggsave("enhanced_density_plot.png", enhanced_density, width = 8, height = 6, dpi = 300)

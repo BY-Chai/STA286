@@ -3,32 +3,43 @@ library(plyr)  # Needed for arrange()
 library(ggplot2)
 library(tidyverse)  # Includes ggplot2 and dplyr
 
-filepth_a = paste(toString(getwd()), "/data/Classical-General-Normalized.xlsx", sep="")
-filepth_b = paste(toString(getwd()), "/data/Video-General-Normalized.xlsx", sep="")
+# Define the working directory as a constant
+working_directory <- toString(getwd())
 
-# Read and prepare dataset A
-dataset_a <- read_excel(filepth_a) %>%
-  rename(
-    reaction_time = `buzz time`,
-    actual_time = `speaking time`
-  ) %>%
-  mutate(
-    reaction = (reaction_time + actual_time) / 2,  # Calculate average reaction
-    delay = (actual_time - reaction_time), # Calculate delay time between button press and answering
-    dataset = "classical"                          # Label the dataset
-  )
+# Define file paths for dataset A and B as arrays
+filepaths_a <- c("Classical-General-Normalized.xlsx", "Classical-Intermediate-Normalized.xlsx")
+filepaths_b <- c("Video-General-Normalized.xlsx", "Video-Intermediate-Normalized.xlsx")
 
-# Read and prepare dataset B
-dataset_b <- read_excel(filepth_b) %>%
-  rename(
-    reaction_time = `buzz time`,
-    actual_time = `speaking time`
-  ) %>%
-  mutate(
-    reaction = (reaction_time + actual_time) / 2,
-    delay = (actual_time - reaction_time), # Calculate delay time between button press and answering
-    dataset = "video"
-  )
+# Function to generate full file paths
+generate_filepaths <- function(filenames, directory) {
+  sapply(filenames, function(filename) paste(directory, "/data/", filename, sep = ""))
+}
+
+# Generate full file paths for dataset A and B
+filepaths_a <- generate_filepaths(filepaths_a, working_directory)
+filepaths_b <- generate_filepaths(filepaths_b, working_directory)
+
+# Function to read and prepare datasets
+prepare_dataset <- function(filepaths, dataset_label) {
+  dataset <- lapply(filepaths, function(filepath) {
+    read_excel(filepath) %>%
+      rename(
+        reaction_time = `buzz time`,
+        actual_time = `speaking time`
+      ) %>%
+      mutate(
+        reaction = (reaction_time + actual_time) / 2,  # Calculate average reaction
+        delay = (actual_time - reaction_time),         # Calculate delay time
+        dataset = dataset_label                        # Label the dataset
+      )
+  }) %>%
+    bind_rows()  # Combine all files into a single dataset
+  return(dataset)
+}
+
+# Read and prepare datasets A and B
+dataset_a <- prepare_dataset(filepaths_a, "classical")
+dataset_b <- prepare_dataset(filepaths_b, "video")
 
 # Check column names
 print(colnames(dataset_a))
