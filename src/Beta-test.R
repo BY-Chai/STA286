@@ -1,19 +1,5 @@
 # Import 
-source("t-test.R")
-# Define the working directory as a constant
-working_directory <- toString(getwd())
-
-# Define file paths for dataset A and B as arrays
-filepaths_a <- c("Classical Distinct Normalized.xlsx")
-filepaths_b <- c("Video Distinct Normalized.xlsx")
-
-# Generate full file paths for dataset A and B
-filepaths_a <- generate_filepaths(filepaths_a, working_directory)
-filepaths_b <- generate_filepaths(filepaths_b, working_directory)
-
-# Read and prepare datasets A and B
-dataset_a <- prepare_dataset(filepaths_a, "classical")
-dataset_b <- prepare_dataset(filepaths_b, "video")
+source("Dataload.R")
 
 alpha = 0.05
 
