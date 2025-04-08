@@ -45,9 +45,9 @@ plot_histogram_with_stats <- function(data1, data2, column, title, xlab, color1,
 
 # Plot overlapping histograms
 plot_histogram_with_stats(dataset_a, dataset_b, "reaction_time", 
-                          "Reaction Time Comparison", "Reaction Time", "#1f77b4", "#ff7f0e", alpha = 0.5)
+                          "Reaction Time Comparison", "Normalized Reaction Time (% of question)", "#1f77b4", "#ff7f0e", alpha = 0.5)
 plot_histogram_with_stats(dataset_a, dataset_b, "actual_time", 
-                          "Answering Time Comparison", "Answering Time", "#1f77b4", "#ff7f0e", alpha = 0.5)
+                          "Answering Time Comparison", "Normalized Answering Time (% of quesiton)", "#1f77b4", "#ff7f0e", alpha = 0.5)
 plot_histogram_with_stats(dataset_a, dataset_b, "delay", 
                           "Delay Time Comparison", "Delay Time", "#1f77b4", "#ff7f0e", alpha = 0.5)
 plot_histogram_with_stats(dataset_a, dataset_b, "reaction", 

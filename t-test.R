@@ -46,7 +46,7 @@ dataset_b <- prepare_dataset(filepaths_b, "video")
 print(colnames(dataset_a))
 
 plot_histogram_with_stats <- function(data, column, title, xlab, bar_color) {
-  hist_data <- hist(data[[column]], breaks = 5, plot = FALSE)
+  hist_data <- hist(data[[column]], breaks = "Sturges", plot = FALSE)
   mean_value <- mean(data[[column]], na.rm = TRUE)
   sd_value <- sd(data[[column]], na.rm = TRUE)
   plot(
@@ -70,23 +70,25 @@ plot_histogram_with_stats <- function(data, column, title, xlab, bar_color) {
   # Shade the region corresponding to one standard deviation
   rect(mean_value - sd_value, 0, mean_value + sd_value, max(hist_data$counts), 
        col = rgb(1, 0, 0, 0.2), border = NA)
+  print(paste("Mean of", column, "for", data$dataset[1], "dataset:", mean_value))
+  print(paste("Standard deviation of", column, "for", data$dataset[1], "dataset:", sd_value))
 }
 
 # Plot histograms
 plot_histogram_with_stats(dataset_a, "reaction_time", 
-                          "Classical Dataset Reaction Time", "Reaction Time", "#1f77b4")
+                          "Classical Dataset Reaction Time", "Normalized Reaction Time (s/s)", "#1f77b4")
 plot_histogram_with_stats(dataset_b, "reaction_time", 
-                          "Video Dataset Reaction Time", "Reaction Time", "#ff7f0e")
+                          "Video Dataset Reaction Time", "Normalized Reaction Time (s/s)", "#ff7f0e")
 
 plot_histogram_with_stats(dataset_a, "actual_time", 
-                          "Classical Dataset Answering Time", "Answering Time", "#1f77b4")
+                          "Classical Dataset Answering Time", "Normalized Answering Time (s/s)", "#1f77b4")
 plot_histogram_with_stats(dataset_b, "actual_time", 
-                          "Video Dataset Answering Time", "Answering Time", "#ff7f0e")
+                          "Video Dataset Answering Time", "Normalized Answering Time (s/s)", "#ff7f0e")
 
 plot_histogram_with_stats(dataset_a, "delay", 
-                          "Classical Dataset Delay Time", "Delay Time", "#1f77b4")
+                          "Classical Dataset Delay Time", "Normalized Delay Time (s/s)", "#1f77b4")
 plot_histogram_with_stats(dataset_b, "delay", 
-                          "Video Dataset Delay Time", "Delay Time", "#ff7f0e")
+                          "Video Dataset Delay Time", "Normalized Delay Time (s/s)", "#ff7f0e")
 
 plot_histogram_with_stats(dataset_a, "reaction", 
                           "Classical Dataset Agg Time", "Agg Time", "#1f77b4")
@@ -97,11 +99,13 @@ plot_histogram_with_stats(dataset_b, "reaction",
 # T-test function in R, where x and y are the independent samples to be compared.
 # Perform t-tests between the two datasets
 
+condition <- "less"  # Set the condition for the t-test
+
 # Reaction Time Comparison
 t_reaction_time <- t.test(
   dataset_a$reaction_time,
   dataset_b$reaction_time,
-  alternative = "greater",       # Test if dataset_a is generally lower than dataset_b
+  alternative = condition,
   var.equal = FALSE,          # Welch's t-test (recommended if variances may differ)
   conf.level = 0.95
 )
@@ -110,7 +114,7 @@ t_reaction_time <- t.test(
 t_actual_time <- t.test(
   dataset_a$actual_time,
   dataset_b$actual_time,
-  alternative = "greater",       # Test if dataset_a is generally lower than dataset_b
+  alternative = condition,
   var.equal = FALSE,
   conf.level = 0.95
 )
@@ -139,5 +143,5 @@ cov_classical <- cov(dataset_a$reaction_time, dataset_a$actual_time, use = "comp
 cov_video <- cov(dataset_b$reaction_time, dataset_b$actual_time, use = "complete.obs")
 
 # Display covariance results
-cat("Covariance (Classical Dataset):", cov_classical, "\n")
-cat("Covariance (Video Dataset):", cov_video, "\n")
+cat("Reaction-answering time covariance: Classical dataset", cov_classical, "\n")
+cat("Reaction-answering time covariance: Video game dataset", cov_video, "\n")
