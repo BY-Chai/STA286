@@ -7,7 +7,7 @@ library(dplyr)    # For data manipulation
 
 # Read the Excel file
 # Replace "your_file.xlsx" with your actual file path and sheet name if needed
-filepth <- paste(toString(getwd()), "/data/Classical-General-Normalized.xlsx", sep="")
+filepth <- paste(toString(getwd()), "/data/Classical Average (normalized).xlsx", sep="")
 print(filepth)
 data <- read_excel(filepth) %>%
   mutate(

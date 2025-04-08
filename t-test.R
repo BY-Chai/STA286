@@ -7,8 +7,8 @@ library(tidyverse)  # Includes ggplot2 and dplyr
 working_directory <- toString(getwd())
 
 # Define file paths for dataset A and B as arrays
-filepaths_a <- c("Classical-General-Normalized.xlsx", "Classical-Intermediate-Normalized.xlsx")
-filepaths_b <- c("Video-General-Normalized.xlsx", "Video-Intermediate-Normalized.xlsx")
+filepaths_a <- c("Classical Distinct Normalized.xlsx")
+filepaths_b <- c("Video Distinct Normalized.xlsx")
 
 # Function to generate full file paths
 generate_filepaths <- function(filenames, directory) {
@@ -23,6 +23,7 @@ filepaths_b <- generate_filepaths(filepaths_b, working_directory)
 prepare_dataset <- function(filepaths, dataset_label) {
   dataset <- lapply(filepaths, function(filepath) {
     read_excel(filepath) %>%
+      drop_na() %>%  # Drop rows with NA values in any column
       rename(
         reaction_time = `buzz time`,
         actual_time = `speaking time`
@@ -44,26 +45,53 @@ dataset_b <- prepare_dataset(filepaths_b, "video")
 # Check column names
 print(colnames(dataset_a))
 
-print(
-  hist(dataset_a$reaction_time, breaks = 10, main = "Classical Dataset Reaction Time", xlab = "Reaction Time")
-)
-print(
-  hist(dataset_b$reaction_time, breaks = 10, main = "Video Dataset Reaction Time", xlab = "Reaction Time")
-)
+plot_histogram_with_stats <- function(data, column, title, xlab, bar_color) {
+  hist_data <- hist(data[[column]], breaks = 5, plot = FALSE)
+  mean_value <- mean(data[[column]], na.rm = TRUE)
+  sd_value <- sd(data[[column]], na.rm = TRUE)
+  plot(
+    hist_data,
+    main = title,
+    xlab = xlab,
+    col = bar_color,
+    border = "black"
+  )
+  # Add mean as a red vertical line
+  abline(v = mean_value, col = "red", lwd = 2)
+  # Add annotation for the mean
+  text(mean_value, max(hist_data$counts) * 0.9, 
+       labels = paste("Mean =", round(mean_value, 2)), 
+       col = "red", pos = 4)
+  # Add annotation for the standard error
+  se_value <- sd_value / sqrt(length(data[[column]]))
+  text(mean_value, max(hist_data$counts) * 0.8, 
+    labels = paste("SE =", round(se_value, 2)), 
+    col = "red", pos = 4)
+  # Shade the region corresponding to one standard deviation
+  rect(mean_value - sd_value, 0, mean_value + sd_value, max(hist_data$counts), 
+       col = rgb(1, 0, 0, 0.2), border = NA)
+}
 
-print(
-  hist(dataset_a$actual_time, breaks = 10, main = "Classical Dataset Answering Time", xlab = "Reaction Time")
-)
-print(
-  hist(dataset_b$actual_time, breaks = 10, main = "Video Dataset Answering Time", xlab = "Reaction Time")
-)
+# Plot histograms
+plot_histogram_with_stats(dataset_a, "reaction_time", 
+                          "Classical Dataset Reaction Time", "Reaction Time", "#1f77b4")
+plot_histogram_with_stats(dataset_b, "reaction_time", 
+                          "Video Dataset Reaction Time", "Reaction Time", "#ff7f0e")
 
-print(
-  hist(dataset_a$delay, breaks = 10, main = "Classical Dataset Delay Time", xlab = "Reaction Time")
-)
-print(
-  hist(dataset_b$delay, breaks = 10, main = "Video Dataset delay Time", xlab = "Reaction Time")
-)
+plot_histogram_with_stats(dataset_a, "actual_time", 
+                          "Classical Dataset Answering Time", "Answering Time", "#1f77b4")
+plot_histogram_with_stats(dataset_b, "actual_time", 
+                          "Video Dataset Answering Time", "Answering Time", "#ff7f0e")
+
+plot_histogram_with_stats(dataset_a, "delay", 
+                          "Classical Dataset Delay Time", "Delay Time", "#1f77b4")
+plot_histogram_with_stats(dataset_b, "delay", 
+                          "Video Dataset Delay Time", "Delay Time", "#ff7f0e")
+
+plot_histogram_with_stats(dataset_a, "reaction", 
+                          "Classical Dataset Agg Time", "Agg Time", "#1f77b4")
+plot_histogram_with_stats(dataset_b, "reaction", 
+                          "Video Dataset Agg Time", "Agg Time", "#ff7f0e")
 
 
 # T-test function in R, where x and y are the independent samples to be compared.
@@ -73,7 +101,7 @@ print(
 t_reaction_time <- t.test(
   dataset_a$reaction_time,
   dataset_b$reaction_time,
-  alternative = "two.sided",  # Test if means are different
+  alternative = "greater",       # Test if dataset_a is generally lower than dataset_b
   var.equal = FALSE,          # Welch's t-test (recommended if variances may differ)
   conf.level = 0.95
 )
@@ -82,7 +110,7 @@ t_reaction_time <- t.test(
 t_actual_time <- t.test(
   dataset_a$actual_time,
   dataset_b$actual_time,
-  alternative = "two.sided",
+  alternative = "greater",       # Test if dataset_a is generally lower than dataset_b
   var.equal = FALSE,
   conf.level = 0.95
 )
@@ -105,3 +133,11 @@ if (t_actual_time$p.value < 0.05) {
 } else {
   cat("Actual Time: No significant difference (p =", t_actual_time$p.value, ")\n")
 }
+
+# Calculate covariance between reaction time and actual time for each dataset
+cov_classical <- cov(dataset_a$reaction_time, dataset_a$actual_time, use = "complete.obs")
+cov_video <- cov(dataset_b$reaction_time, dataset_b$actual_time, use = "complete.obs")
+
+# Display covariance results
+cat("Covariance (Classical Dataset):", cov_classical, "\n")
+cat("Covariance (Video Dataset):", cov_video, "\n")

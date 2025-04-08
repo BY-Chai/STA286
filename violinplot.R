@@ -6,8 +6,8 @@ library(plyr)  # Needed for arrange()
 library(ggplot2)
 library(tidyverse)  # Includes ggplot2 and dplyr
 
-filepth_a = paste(toString(getwd()), "/data/Classical-General-Normalized.xlsx", sep="")
-filepth_b = paste(toString(getwd()), "/data/Video-General-Normalized.xlsx", sep="")
+filepth_a = paste(toString(getwd()), "/data/Classical Average (normalized).xlsx", sep="")
+filepth_b = paste(toString(getwd()), "/data/Video Game Average (normalized).xlsx", sep="")
 
 # 1. First define the corrected GeomSplitViolin
 GeomSplitViolin <- ggproto(
@@ -93,7 +93,7 @@ print(colnames(combined_data))
 
 # 2. Create the split violin plot
 print(
-ggplot(combined_data, aes(x = 'General Dataset', y = reaction, fill = dataset)) +
+ggplot(combined_data, aes(x = 'General Dataset', y = actual_time, fill = dataset)) +
   # Split violin plot (half for each dataset)
   geom_split_violin(alpha = 0.7, width = 0.8) +
   
